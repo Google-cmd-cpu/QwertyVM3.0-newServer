@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>QwertyVM 3.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>QwertyVM 3.0</h1>
+  <div id="vm-container">
+    <div class="vm-card" data-vm="VM0">
+      <img src="assets/vm-screens/vm0.jpg" alt="Instance">
+      <h3>Instance (VM0)</h3>
+      <p id="status-VM0">⏳ Подключение к очереди...</p>
+      <button id="control-VM0" style="display:none;">Управлять</button>
+    </div>
+  </div>
+
+  <script>
+    const vmId = "VM0";
+    const status = document.getElementById("status-" + vmId);
+    const button = document.getElementById("control-" + vmId);
+
+    const ws = new WebSocket("ws://localhost:8080");
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "joined" || data.type === "update") {
+        status.textContent = `Ваша позиция: ${data.position}/10`;
+        if (data.position === 1) {
+          button.style.display = "inline-block";
+        } else {
+          button.style.display = "none";
+        }
+      } else if (data.type === "full") {
+        status.textContent = "🚫 Очередь заполнена.";
+        button.style.display = "none";
+      }
+    };
+
+    button.addEventListener("click", () => {
+      window.location.href = `console.html?vm=${vmId}`;
+    });
+  </script>
+</body>
+</html>
